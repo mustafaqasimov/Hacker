@@ -12,7 +12,7 @@ import java.time.Duration;
 @Configuration
 class RateLimitConfig {
     @Bean(destroyMethod="shutdown") RedisClient rateLimitRedis(@Value("${hacktrain.rate-limit.redis-uri}") String uri) {
-        var redisUri=RedisURI.create(uri); redisUri.setTimeout(Duration.ofSeconds(2)); return RedisClient.create(redisUri);
+        var redisUri=RedisURI.create(uri); redisUri.setTimeout(Duration.ofSeconds(10)); return RedisClient.create(redisUri);
     }
     @Bean(destroyMethod="close") StatefulRedisConnection<String,byte[]> rateLimitConnection(RedisClient rateLimitRedis) {
         return rateLimitRedis.connect(RedisCodec.of(StringCodec.UTF8,ByteArrayCodec.INSTANCE));
