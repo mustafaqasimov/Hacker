@@ -1,0 +1,4 @@
+CREATE ROLE hacktrain_test_runtime LOGIN PASSWORD 'only-for-ephemeral-testcontainers' NOSUPERUSER NOBYPASSRLS;
+GRANT USAGE ON SCHEMA public TO hacktrain_test_runtime;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT,INSERT,UPDATE,DELETE ON TABLES TO hacktrain_test_runtime;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE,SELECT ON SEQUENCES TO hacktrain_test_runtime;

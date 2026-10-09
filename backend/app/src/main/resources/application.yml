@@ -1,0 +1,92 @@
+spring:
+  application:
+    name: hacktrain
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      connection-timeout: 3000
+  flyway:
+    enabled: false
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  data:
+    redis:
+      url: ${REDIS_URL}
+      timeout: 2s
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${SMTP_AUTH:true}
+      mail.smtp.starttls.enable: ${SMTP_TLS:true}
+      mail.smtp.starttls.required: ${SMTP_TLS:true}
+      mail.smtp.connectiontimeout: 3000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: none
+  max-http-request-header-size: 16KB
+  tomcat:
+    max-http-form-post-size: 16KB
+    max-swallow-size: 16KB
+management:
+  server:
+    port: 9091
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      group:
+        readiness:
+          include: readinessState,db,redis
+      probes:
+        enabled: true
+      show-details: never
+logging:
+  structured:
+    format:
+      console: ecs
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+hacktrain:
+  ai:
+    groq-key: ${GROQ_API_KEY:}
+    groq-model: ${GROQ_MODEL:openai/gpt-oss-20b}
+    provider: ${AI_PROVIDER:openai}
+    anthropic-key: ${ANTHROPIC_API_KEY:}
+    claude-model: ${CLAUDE_MODEL:claude-sonnet-4-6}
+    openai-key: ${OPENAI_API_KEY:}
+    model: ${OPENAI_MODEL:}
+    student-daily-limit: ${AI_STUDENT_DAILY_LIMIT:30}
+    organization-daily-limit: ${AI_ORGANIZATION_DAILY_LIMIT:1000}
+  auth:
+    email-confirmation-required: false
+    jwt-secret: ${JWT_SECRET}
+    mail-encryption-key: ${MAIL_ENCRYPTION_KEY}
+    issuer: ${JWT_ISSUER:hacktrain}
+    audience: ${JWT_AUDIENCE:hacktrain-api}
+    access-ttl: 10m
+    refresh-ttl: 30d
+    frontend-url: ${FRONTEND_URL}
+    mail-from: ${MAIL_FROM:noreply@hacktrain.local}
+    cors-origins: ${CORS_ORIGINS}
+  rate-limit:
+    redis-uri: ${REDIS_URL}

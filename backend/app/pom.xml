@@ -1,0 +1,14 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><parent><groupId>az.hacktrain</groupId><artifactId>hacktrain-backend</artifactId><version>1.0.0-SNAPSHOT</version></parent><artifactId>app</artifactId><dependencies>
+<dependency><groupId>az.hacktrain</groupId><artifactId>ai</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>az.hacktrain</groupId><artifactId>course</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>az.hacktrain</groupId><artifactId>organization</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>az.hacktrain</groupId><artifactId>auth</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>org.postgresql</groupId><artifactId>postgresql</artifactId><scope>runtime</scope></dependency>
+<dependency><groupId>org.flywaydb</groupId><artifactId>flyway-database-postgresql</artifactId></dependency>
+<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-actuator</artifactId></dependency>
+<dependency><groupId>io.micrometer</groupId><artifactId>micrometer-registry-prometheus</artifactId></dependency>
+<dependency><groupId>org.springdoc</groupId><artifactId>springdoc-openapi-starter-webmvc-ui</artifactId><version>2.8.13</version></dependency>
+<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
+<dependency><groupId>org.testcontainers</groupId><artifactId>postgresql</artifactId><scope>test</scope></dependency>
+<dependency><groupId>org.testcontainers</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
+</dependencies><build><plugins><plugin><groupId>org.jacoco</groupId><artifactId>jacoco-maven-plugin</artifactId><executions><execution><id>aggregate</id><phase>verify</phase><goals><goal>report-aggregate</goal></goals><configuration><includeCurrentProject>true</includeCurrentProject></configuration></execution></executions></plugin><plugin><groupId>org.springframework.boot</groupId><artifactId>spring-boot-maven-plugin</artifactId></plugin></plugins></build></project>

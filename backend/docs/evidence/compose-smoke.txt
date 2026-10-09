@@ -1,0 +1,20 @@
+PASS: registration accepted
+PASS: encrypted outbox delivered verification over SMTP
+PASS: email verified
+PASS: login returned tokens
+PASS: authenticated profile belongs to student
+PASS: refresh rotated
+PASS: replayed refresh rejected
+PASS: replay revoked new family token
+PASS: OpenAPI served
+PASS: Grafana health
+PASS: organization created with restricted runtime role
+PASS: group persisted inside tenant
+PASS: invited student registration accepted
+PASS: invited student email verified
+PASS: invited student authenticated
+PASS: nonmember cannot access tenant
+PASS: organization invitation queued
+PASS: email-bound invitation accepted
+PASS: student assigned to group
+PASS: student sees assigned group

@@ -1,0 +1,7 @@
+**/target/
+
+*.pem
+
+.env.claude.local
+
+.env.groq.local

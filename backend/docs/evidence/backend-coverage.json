@@ -1,0 +1,34 @@
+{
+  "command": "mvn -B -ntp clean verify",
+  "date": "2026-10-09",
+  "tests": 76,
+  "failures": 0,
+  "skipped": 0,
+  "scope": "auth + organization + app + standalone migration; unimplemented modules are not measured",
+  "counters": {
+    "INSTRUCTION": {
+      "covered": 4627,
+      "missed": 325
+    },
+    "BRANCH": {
+      "covered": 183,
+      "missed": 57
+    },
+    "LINE": {
+      "covered": 584,
+      "missed": 67
+    },
+    "COMPLEXITY": {
+      "covered": 342,
+      "missed": 113
+    },
+    "METHOD": {
+      "covered": 275,
+      "missed": 60
+    },
+    "CLASS": {
+      "covered": 68,
+      "missed": 1
+    }
+  }
+}

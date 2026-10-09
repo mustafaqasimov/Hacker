@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Annotation profile for hacktrain-backend" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
+        </processorPath>
+        <module name="ai" />
+        <module name="app" />
+        <module name="migration" />
+        <module name="course" />
+        <module name="auth" />
+        <module name="organization" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="ai" options="-parameters" />
+      <module name="app" options="-parameters" />
+      <module name="auth" options="-parameters" />
+      <module name="course" options="-parameters" />
+      <module name="hacktrain-backend" options="-parameters" />
+      <module name="migration" options="-parameters" />
+      <module name="organization" options="-parameters" />
+    </option>
+  </component>
+</project>

@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["difficulty", "evidenceAttemptIds", "needsClarification", "clarifyingQuestion", "hintLevel", "hintText", "confidence"],
+  "properties": {
+    "difficulty": {"type":"string", "minLength":1, "maxLength":500},
+    "evidenceAttemptIds": {"type":"array", "maxItems":0, "items":{"type":"string"}},
+    "needsClarification": {"type":"boolean"},
+    "clarifyingQuestion": {"type":["string","null"], "maxLength":500},
+    "hintLevel": {"type":"integer", "enum":[1]},
+    "hintText": {"type":"string", "minLength":1, "maxLength":2000},
+    "confidence": {"type":"number", "minimum":0, "maximum":1}
+  }
+}

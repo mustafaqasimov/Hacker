@@ -1,0 +1,5 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><parent><groupId>az.hacktrain</groupId><artifactId>hacktrain-backend</artifactId><version>1.0.0-SNAPSHOT</version></parent><artifactId>ai</artifactId><dependencies>
+<dependency><groupId>az.hacktrain</groupId><artifactId>course</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>io.github.resilience4j</groupId><artifactId>resilience4j-circuitbreaker</artifactId><version>2.3.0</version></dependency>
+<dependency><groupId>com.networknt</groupId><artifactId>json-schema-validator</artifactId><version>1.5.6</version></dependency>
+</dependencies></project>
