@@ -15,7 +15,5 @@ class AuthRetention {
         var now=clock.instant();
         // Keep used refresh hashes until family expiry so replay detection remains effective.
         em.createQuery("delete from RefreshSession s where s.expiresAt<:cutoff").setParameter("cutoff",now.minus(Duration.ofDays(1))).executeUpdate();
-        em.createQuery("delete from ActionToken t where t.expiresAt<:cutoff").setParameter("cutoff",now.minus(Duration.ofDays(1))).executeUpdate();
-        em.createQuery("delete from MailMessage m where m.createdAt<:cutoff").setParameter("cutoff",now.minus(Duration.ofDays(7))).executeUpdate();
     }
 }

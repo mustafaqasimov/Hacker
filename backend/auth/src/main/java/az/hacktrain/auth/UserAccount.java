@@ -8,7 +8,6 @@ class UserAccount {
     @Id UUID id;
      String email;
      String passwordHash;
-     boolean emailVerified;
      boolean blocked;
      long tokenVersion;
      String platformRole;
@@ -17,7 +16,6 @@ class UserAccount {
     public UUID getId() { return id; }
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
-    public boolean getEmailVerified() { return emailVerified; }
     public boolean getBlocked() { return blocked; }
     public long getTokenVersion() { return tokenVersion; }
     public String getPlatformRole() { return platformRole; }

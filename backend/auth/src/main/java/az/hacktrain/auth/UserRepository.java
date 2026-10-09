@@ -8,6 +8,6 @@ interface UserRepository extends JpaRepository<UserAccount, UUID> {
     @Query("select u from UserAccount u where u.id = :id")
     Optional<UserAccount> lockById(UUID id);
     @Modifying
-    @Query(value="insert into user_account(id,email,password_hash,email_verified,blocked,token_version,platform_role,created_at) values (:id,:email,:password,false,false,0,'STUDENT',now()) on conflict(email) do nothing", nativeQuery=true)
+    @Query(value="insert into user_account(id,email,password_hash,blocked,token_version,platform_role,created_at) values (:id,:email,:password,false,0,'STUDENT',now()) on conflict(email) do nothing", nativeQuery=true)
     int insertIfAbsent(UUID id, String email, String password);
 }

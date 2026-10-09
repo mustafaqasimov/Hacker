@@ -15,5 +15,6 @@ public final class OrganizationDtos {
     public record MemberView(UUID id,UUID organizationId,UUID userId,String role,String status,long version,Instant createdAt) {}
     public record GroupView(UUID id,String name,boolean archived,long version,Instant createdAt) {}
     public record InvitationView(UUID id,String email,String role,Instant expiresAt,Instant consumedAt,boolean revoked,Instant createdAt) {}
+    public record CreatedInvitation(InvitationView invitation,String token) {}
     public record PageResult<T>(List<T> items,int page,int size,long total) {}
 }

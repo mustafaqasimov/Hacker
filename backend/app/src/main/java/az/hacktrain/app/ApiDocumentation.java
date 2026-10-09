@@ -12,7 +12,7 @@ class ApiDocumentation {
             .components(new Components().addSecuritySchemes("bearerAuth",new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
     }
     @Bean OpenApiCustomizer operationSecurity() {
-        var publicPaths=Set.of("register","login","refresh","logout","verify-email","resend-verification","forgot-password","reset-password");
+        var publicPaths=Set.of("register","login","refresh","logout");
         return api->api.getPaths().forEach((path,item)->{
             String suffix=path.substring(path.lastIndexOf('/')+1);
             if(!path.startsWith("/api/v1/auth/") || !publicPaths.contains(suffix)) item.readOperations().forEach(op->op.addSecurityItem(new SecurityRequirement().addList("bearerAuth")));

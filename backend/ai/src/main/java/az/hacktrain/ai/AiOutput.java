@@ -9,12 +9,12 @@ import java.util.*;
 @Component
 class AiOutput {
     final String schema,system; private final JsonSchema validator; private final ObjectMapper mapper; private final List<String> secrets;
-    AiOutput(ObjectMapper mapper,@Value("${hacktrain.ai.openai-key:}") String key,@Value("${hacktrain.ai.anthropic-key:}") String anthropicKey,@Value("${hacktrain.ai.groq-key:}") String groqKey,@Value("${hacktrain.auth.jwt-secret}") String jwt,@Value("${hacktrain.auth.mail-encryption-key}") String mail) throws java.io.IOException {
+    AiOutput(ObjectMapper mapper,@Value("${hacktrain.ai.openai-key:}") String key,@Value("${hacktrain.ai.anthropic-key:}") String anthropicKey,@Value("${hacktrain.ai.groq-key:}") String groqKey,@Value("${hacktrain.auth.jwt-secret}") String jwt) throws java.io.IOException {
         this.mapper=mapper;
         try(var input=new ClassPathResource("ai/tutor-response-v1.schema.json").getInputStream()) { schema=new String(input.readAllBytes(),StandardCharsets.UTF_8); }
         try(var input=new ClassPathResource("ai/tutor-system-v1.txt").getInputStream()) { system=new String(input.readAllBytes(),StandardCharsets.UTF_8); }
         validator=JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V202012).getSchema(schema);
-        secrets=List.of(key,anthropicKey,groqKey,jwt,mail).stream().filter(s->!s.isBlank()).toList();
+        secrets=List.of(key,anthropicKey,groqKey,jwt).stream().filter(s->!s.isBlank()).toList();
     }
     AiDtos.Hint validate(String json) throws Exception {
         var tree=mapper.readTree(json);

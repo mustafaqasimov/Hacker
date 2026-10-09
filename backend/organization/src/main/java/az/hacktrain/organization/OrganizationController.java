@@ -53,7 +53,7 @@ public class OrganizationController {
     @GetMapping("/organizations/{org}/groups/{group}/teachers")
     public PageResult<MemberView> teachers(@AuthenticationPrincipal Jwt jwt,@PathVariable UUID org,@PathVariable UUID group,@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size) { return service.roster(org,actor(jwt),group,page,size,true); }
     @PostMapping("/organizations/{org}/invitations") @ResponseStatus(HttpStatus.CREATED)
-    public InvitationView invite(@AuthenticationPrincipal Jwt jwt,@PathVariable UUID org,@Valid @RequestBody Invite dto) { return service.invite(org,actor(jwt),dto); }
+    public CreatedInvitation invite(@AuthenticationPrincipal Jwt jwt,@PathVariable UUID org,@Valid @RequestBody Invite dto) { return service.invite(org,actor(jwt),dto); }
     @GetMapping("/organizations/{org}/invitations")
     public PageResult<InvitationView> invitations(@AuthenticationPrincipal Jwt jwt,@PathVariable UUID org,@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size) { return service.invitations(org,actor(jwt),page,size); }
     @DeleteMapping("/organizations/{org}/invitations/{invitation}") @ResponseStatus(HttpStatus.NO_CONTENT)

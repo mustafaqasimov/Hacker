@@ -17,12 +17,11 @@ class OrganizationServiceTest {
     OrganizationMapper mapper=mock(OrganizationMapper.class);
     TenantScope scope=mock(TenantScope.class);
     IdentityAccess identities=mock(IdentityAccess.class);
-    TransactionalMail mail=mock(TransactionalMail.class);
     EntityManager em=mock(EntityManager.class);
     OrganizationQuota quota=mock(OrganizationQuota.class);
     OrganizationService service;
     UUID actor=UUID.randomUUID(),orgId=UUID.randomUUID();
-    @BeforeEach void init() { service=new OrganizationService(orgs,members,groups,students,teachers,invitations,events,mapper,scope,identities,mail,new InvitationTokens(),Clock.systemUTC(),em,quota,"http://localhost:8080"); }
+    @BeforeEach void init() { service=new OrganizationService(orgs,members,groups,students,teachers,invitations,events,mapper,scope,identities,new InvitationTokens(),Clock.systemUTC(),em,quota); }
     @Test void unauthorizedTenantStopsBeforeLoadingTenantData() {
         when(members.findByOrganizationIdAndUserId(orgId,actor)).thenReturn(Optional.empty());
         assertThatThrownBy(()->service.get(orgId,actor)).isInstanceOf(OrganizationFailure.class);

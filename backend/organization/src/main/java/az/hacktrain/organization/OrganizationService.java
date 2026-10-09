@@ -1,9 +1,7 @@
 package az.hacktrain.organization;
 
 import az.hacktrain.auth.IdentityDirectory;
-import az.hacktrain.auth.MailOutbox;
 import jakarta.persistence.EntityManager;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,21 +24,18 @@ public class OrganizationService implements OrganizationAccess {
     private final OrganizationMapper mapper;
     private final TenantScope scope;
     private final IdentityDirectory identities;
-    private final MailOutbox mail;
     private final InvitationTokens tokens;
     private final Clock clock;
     private final EntityManager em;
-    private final String frontend;
     private final OrganizationQuota quota;
     OrganizationService(OrganizationRepository organizations,MembershipRepository members,GroupRepository groups,
             GroupStudentRepository students,TeacherAssignmentRepository teachers,InvitationRepository invitations,
             OrganizationEventRepository events,OrganizationMapper mapper,TenantScope scope,IdentityDirectory identities,
-            MailOutbox mail,InvitationTokens tokens,Clock clock,EntityManager em,OrganizationQuota quota,
-            @Value("${hacktrain.auth.frontend-url}") String frontend) {
+            InvitationTokens tokens,Clock clock,EntityManager em,OrganizationQuota quota) {
         this.organizations=organizations; this.members=members; this.groups=groups; this.students=students;
         this.teachers=teachers; this.invitations=invitations; this.events=events; this.mapper=mapper;
-        this.scope=scope; this.identities=identities; this.mail=mail; this.tokens=tokens; this.clock=clock; this.em=em;
-        this.frontend=frontend; this.quota=quota;
+        this.scope=scope; this.identities=identities; this.tokens=tokens; this.clock=clock; this.em=em;
+        this.quota=quota;
     }
     public OrganizationView create(UUID actor,Create dto) {
         scope.actor(actor); identities.lockActive(actor);
@@ -136,8 +131,8 @@ public class OrganizationService implements OrganizationAccess {
         requireGroupAccess(c.member,groupId);
         return result(teacherList?teachers.teachers(org,groupId,page(page,size)):students.roster(org,groupId,page(page,size)),mapper::view);
     }
-    public InvitationView invite(UUID org,UUID actor,Invite dto) {
-        var c=admin(org,actor,false); quota.invitation(org,actor);
+    public CreatedInvitation invite(UUID org,UUID actor,Invite dto) {
+        admin(org,actor,false); quota.invitation(org,actor);
         String email=dto.email().strip().toLowerCase(Locale.ROOT);
         for(var prior:invitations.findByOrganizationIdAndEmailAndRevokedFalseAndConsumedAtIsNull(org,email)) prior.revoked=true;
         em.flush();
@@ -145,8 +140,7 @@ public class OrganizationService implements OrganizationAccess {
         invitation.id=UUID.randomUUID(); invitation.organizationId=org; invitation.email=email; invitation.role=dto.role().name();
         invitation.tokenHash=tokens.digest(raw); invitation.createdBy=actor; invitation.createdAt=clock.instant(); invitation.expiresAt=clock.instant().plus(Duration.ofDays(3));
         invitations.saveAndFlush(invitation);
-        mail.enqueue(email,"HackTrain təşkilat dəvəti",c.organization.name+" təşkilatına dəvət:\n"+frontend+"/accept-invitation#token="+raw);
-        event(org,actor,invitation.id,"INVITATION_CREATED"); return mapper.view(invitation);
+        event(org,actor,invitation.id,"INVITATION_CREATED"); return new CreatedInvitation(mapper.view(invitation),raw);
     }
     @Transactional(readOnly=true)
     public PageResult<InvitationView> invitations(UUID org,UUID actor,int page,int size) {

@@ -11,7 +11,7 @@ public class AuthController {
     private final AuthService service;
     AuthController(AuthService service) { this.service=service; }
     @PostMapping("/register") @ResponseStatus(HttpStatus.ACCEPTED)
-    public AuthDtos.Accepted register(@Valid @RequestBody AuthDtos.Register dto) { service.register(dto); return new AuthDtos.Accepted("Qeydiyyat sorğusu qəbul edildi. Hesabınızla daxil ola bilərsiniz."); }
+    public AuthDtos.Accepted register(@Valid @RequestBody AuthDtos.Register dto) { service.register(dto); return new AuthDtos.Accepted("Qeydiyyat sorğusu qəbul edildi."); }
     @PostMapping("/login")
     public AuthDtos.Tokens login(@Valid @RequestBody AuthDtos.Login dto) { return service.login(dto); }
     @PostMapping("/refresh")
@@ -20,14 +20,6 @@ public class AuthController {
     public void logout(@Valid @RequestBody AuthDtos.TokenRequest dto) { service.logout(dto.token()); }
     @PostMapping("/logout-all") @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logoutAll(@AuthenticationPrincipal Jwt jwt) { service.logoutAll(UUID.fromString(jwt.getSubject())); }
-    @PostMapping("/verify-email") @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void verify(@Valid @RequestBody AuthDtos.TokenRequest dto) { service.verifyEmail(dto.token()); }
-    @PostMapping("/resend-verification") @ResponseStatus(HttpStatus.ACCEPTED)
-    public AuthDtos.Accepted resend(@Valid @RequestBody AuthDtos.EmailRequest dto) { service.requestAction(dto.email(),"VERIFY_EMAIL"); return AuthDtos.Accepted.generic(); }
-    @PostMapping("/forgot-password") @ResponseStatus(HttpStatus.ACCEPTED)
-    public AuthDtos.Accepted forgot(@Valid @RequestBody AuthDtos.EmailRequest dto) { service.requestAction(dto.email(),"RESET_PASSWORD"); return AuthDtos.Accepted.generic(); }
-    @PostMapping("/reset-password") @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void reset(@Valid @RequestBody AuthDtos.ResetPassword dto) { service.resetPassword(dto); }
     @PostMapping("/change-password") @ResponseStatus(HttpStatus.NO_CONTENT)
     public void change(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody AuthDtos.ChangePassword dto) { service.changePassword(UUID.fromString(jwt.getSubject()),dto); }
     @GetMapping("/me")

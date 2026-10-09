@@ -8,15 +8,11 @@ Baza `/api/v1`. **Hazır:** auth, organization, course və kurs AI köməkçisi 
 
 | Method | Yol | Giriş və nəticə | İcazə |
 |---|---|---|---|
-| POST | /auth/register | email,password → 202 generic | Public |
+| POST | /auth/register | email,password → 202 | Public |
 | POST | /auth/login | email,password → accessToken,refreshToken,expiresIn | Public |
 | POST | /auth/refresh | token → rotasiya edilmiş token cütü | Public token |
 | POST | /auth/logout | token → 204, token ailəsi ləğv olunur | Public token |
 | POST | /auth/logout-all | 204, token version artır | Authenticated |
-| POST | /auth/verify-email | token → 204 | Public token |
-| POST | /auth/resend-verification | 202; təsdiq məktubu göndərilmir | Legacy |
-| POST | /auth/forgot-password | email → 202 generic | Public |
-| POST | /auth/reset-password | token,password → 204 | Public token |
 | POST | /auth/change-password | currentPassword,newPassword → 204 | Authenticated |
 | GET | /auth/me | təhlükəsiz profil DTO | Authenticated |
 
@@ -31,9 +27,9 @@ Baza `/api/v1`. **Hazır:** auth, organization, course və kurs AI köməkçisi 
 | GET | /organizations/{org}/membership | Öz aktiv üzvlüyü və rol | A |
 | GET | /organizations/{org}/members | Üzvlər | O |
 | PATCH/DELETE | /organizations/{org}/members/{member} | Rol/status, çıxar; son admin qorunur | O |
-| POST/GET | /organizations/{org}/invitations | Dəvət yarat/siyahı | O |
+| POST/GET | /organizations/{org}/invitations | Dəvət yarat/siyahı; yaratma cavabında bir dəfəlik token qaytarılır, admin onu əl ilə paylaşır | O |
 | DELETE | /organizations/{org}/invitations/{invitation} | Dəvəti ləğv et | O |
-| POST | /invitations/accept | token ilə, təsdiqli email uyğunluğu | Authenticated |
+| POST | /invitations/accept | token və hesab email-i dəvət email-i ilə uyğun olmalıdır | Authenticated |
 | POST/GET | /organizations/{org}/groups | Qrup yarat/siyahı | O / təyinatına görə A |
 | GET/PATCH/DELETE | /organizations/{org}/groups/{group} | Qrup oxu / yenilə / arxivlə | Təyinatına görə A / O / O |
 | POST/DELETE | /organizations/{org}/groups/{group}/students/{member} | Üzvlük | O |

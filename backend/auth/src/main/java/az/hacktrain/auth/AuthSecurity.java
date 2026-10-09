@@ -33,7 +33,7 @@ class AuthSecurity {
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(JwtValidators.createDefaultWithIssuer(p.issuer()),audience));
         return decoder;
     }
-    @Bean SecurityFilterChain security(HttpSecurity http, AuthProperties p, UserRepository users, AuthRateLimit limiter, @org.springframework.beans.factory.annotation.Value("${hacktrain.auth.email-confirmation-required:false}") boolean confirmationRequired) throws Exception {
+    @Bean SecurityFilterChain security(HttpSecurity http, AuthProperties p, UserRepository users, AuthRateLimit limiter) throws Exception {
         http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(cors(p)))
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .requestCache(c -> c.disable())
@@ -41,14 +41,13 @@ class AuthSecurity {
             .authorizeHttpRequests(a -> a
                 .requestMatchers("/actuator/health/**","/actuator/prometheus").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST,
-                    "/api/v1/auth/register","/api/v1/auth/login","/api/v1/auth/refresh","/api/v1/auth/logout",
-                    "/api/v1/auth/verify-email","/api/v1/auth/resend-verification","/api/v1/auth/forgot-password","/api/v1/auth/reset-password").permitAll()
+                    "/api/v1/auth/register","/api/v1/auth/login","/api/v1/auth/refresh","/api/v1/auth/logout").permitAll()
                 .anyRequest().authenticated())
             .oauth2ResourceServer(o -> o.jwt(j -> j.jwtAuthenticationConverter(jwt -> {
                 try {
                     var user=users.findById(UUID.fromString(jwt.getSubject())).orElseThrow(AuthFailure::invalid);
                     Number version=jwt.getClaim("ver");
-                    if (user.blocked || (confirmationRequired && !user.emailVerified) || version==null || user.tokenVersion!=version.longValue()) throw AuthFailure.invalid();
+                    if (user.blocked || version==null || user.tokenVersion!=version.longValue()) throw AuthFailure.invalid();
                     return new JwtAuthenticationToken(jwt,List.of(new SimpleGrantedAuthority("ROLE_"+user.platformRole)));
                 } catch (RuntimeException e) { throw new org.springframework.security.authentication.BadCredentialsException("Invalid account"); }
             })).authenticationEntryPoint((req,res,e) -> ProblemWriter.write(res,401,"invalid_token","Giriş tələb olunur.")))

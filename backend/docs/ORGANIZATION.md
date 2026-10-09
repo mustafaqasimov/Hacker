@@ -1,6 +1,6 @@
 # Organization modulu
 
-Modul təşkilatları, üzvlükləri, qrupları, müəllim təyinatını və e-poçt dəvətlərini idarə edir. IdentityDirectory və MailOutbox public portları ilə auth-a müraciət edir; auth entity/repository-lərinə giriş etmir. Controller yalnız JWT-dən actor ID götürür. Frontend-dən gələn rol və tenant header-i icazə mənbəyi deyil.
+Modul təşkilatları, üzvlükləri, qrupları və dəvətləri idarə edir. IdentityDirectory public portu ilə auth-a müraciət edir; auth persistence-ə giriş etmir. Təşkilat admini dəvət yaratdıqda API cavabında birdəfəlik token alır və onu dəvət alana ayrıca paylaşır; tətbiq email göndərmir. Dəvəti qəbul edən hesabın email-i dəvət email-i ilə uyğun olmalıdır. Controller yalnız JWT-dən actor ID götürür. Frontend-dən gələn rol və tenant header-i icazə mənbəyi deyil.
 
 ## İcazə modeli
 
@@ -31,7 +31,7 @@ Runtime DB rolu NOSUPERUSER, NOBYPASSRLS və tenant cədvəllərinin sahibi olma
 
 ## Dəvətlər və limitlər
 
-Dəvət 32 random baytdan alınır; DB-də SHA-256 hash, outbox-da AES-GCM ilə şifrələnmiş link saxlanır. TTL üç gündür. İstifadəçi əvvəl qeydiyyatdan keçib email-i təsdiqləməlidir. Eyni təşkilat/email üçün yeni dəvət əvvəlki istifadə edilməmiş linki ləğv edir. Link bir dəfə işləyir; vaxtı bitmiş, ləğv edilmiş və işlənmiş token 404 qaytarır. Başqa email sahibi qəbul edə bilməz. Mövcud aktiv üzvün rolu dəvətlə dəyişdirilmir; bunun üçün audit edilən membership endpoint-i var.
+Dəvət 32 random baytdan alınır; DB-də yalnız SHA-256 hash saxlanır. Token yaradılış cavabında bir dəfə qaytarılır, TTL üç gündür. Qəbul edən əvvəl qeydiyyatdan keçib daxil olmalı, hesab email-i dəvət email-inə uyğun olmalıdır. Eyni təşkilat/email üçün yeni dəvət əvvəlki istifadə edilməmiş linki ləğv edir. Link bir dəfə işləyir; vaxtı bitmiş, ləğv edilmiş və işlənmiş token 404 qaytarır. Başqa email sahibi qəbul edə bilməz. Mövcud aktiv üzvün rolu dəvətlə dəyişdirilmir; bunun üçün audit edilən membership endpoint-i var.
 
 Redis dəvət limitini təşkilat/admin üzrə 50/saat tətbiq edir, Redis kəsiləndə əməliyyat 503 ilə bağlanır. Public təşkilat yaratma limiti hesabın ömrü ərzində üçdür; ayrıca creation counter üzvlükdən çıxmaqla limitin keçilməsinə imkan vermir. Bu abuse limitidir, gələcək billing entitlement limitinin əvəzi deyil. Planlara uyğun dəyişmə ayrıca migrasiya və billing işi olacaq.
 

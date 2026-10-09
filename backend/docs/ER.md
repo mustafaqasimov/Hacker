@@ -1,11 +1,10 @@
 # Hədəf məlumat modeli
 
-Aşağıdakı diaqram bütün platforma üçün nəzərdə tutulur. İcra edilmiş auth cədvəlləri `V1__identity.sql`, təşkilat/üzvlük/qrup/dəvət/audit/creation-quota cədvəlləri `V2__organizations.sql`-dədir. Kurs/mövzu/tapşırıq/məqsəd/təyinat hadisələri `V3__courses.sql`-dədir. Qalan cədvəllər modul implementasiyası ilə ardıcıl migrasiyalarda yaradılacaq; diaqram migration kimi təqdim edilmir. Bütün tenant cədvəllərində organization_id, created_at, optimistic version, tenant daxilində unique və composite foreign key nəzərdə tutulur.
+Aşağıdakı diaqram bütün platforma üçün nəzərdə tutulur. Auth cədvəlləri `V1__identity.sql` və email göndərişindən qalan obyektləri təmizləyən `V4__remove_email_delivery.sql`, təşkilat/üzvlük/qrup/dəvət/audit/creation-quota cədvəlləri `V2__organizations.sql`-dədir. Kurs/mövzu/tapşırıq/məqsəd/təyinat hadisələri `V3__courses.sql`-dədir. Qalan cədvəllər modul implementasiyası ilə ardıcıl migrasiyalarda yaradılacaq; diaqram migration kimi təqdim edilmir. Bütün tenant cədvəllərində organization_id, created_at, optimistic version, tenant daxilində unique və composite foreign key nəzərdə tutulur.
 
 ```mermaid
 erDiagram
   USER_ACCOUNT ||--o{ REFRESH_SESSION : owns
-  USER_ACCOUNT ||--o{ ACTION_TOKEN : receives
   USER_ACCOUNT ||--o{ AUTH_EVENT : generates
   USER_ACCOUNT ||--o{ MEMBERSHIP : joins
   USER_ACCOUNT ||--o| ORGANIZATION_CREATOR_QUOTA : limits
@@ -63,7 +62,6 @@ erDiagram
     uuid id PK
     string email UK
     string password_hash
-    boolean email_verified
     boolean blocked
     bigint token_version
     string platform_role
@@ -77,14 +75,6 @@ erDiagram
     timestamptz expires_at
     timestamptz used_at
     boolean revoked
-  }
-  ACTION_TOKEN {
-    uuid id PK
-    uuid user_id FK
-    string purpose
-    string token_hash UK
-    timestamptz expires_at
-    timestamptz consumed_at
   }
   MEMBERSHIP {
     uuid id PK

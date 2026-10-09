@@ -9,9 +9,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.*;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -35,19 +33,17 @@ class OrganizationFlowIT {
         r.add("spring.data.redis.url",()->"redis://"+redis.getHost()+":"+redis.getMappedPort(6379));
         r.add("hacktrain.rate-limit.redis-uri",()->"redis://"+redis.getHost()+":"+redis.getMappedPort(6379));
         r.add("hacktrain.auth.jwt-secret",()->Base64.getEncoder().encodeToString(new byte[32]));
-        r.add("hacktrain.auth.mail-encryption-key",()->Base64.getEncoder().encodeToString(new byte[32]));
-        r.add("hacktrain.auth.frontend-url",()->"http://localhost:8080"); r.add("hacktrain.auth.mail-from",()->"test@hacktrain.invalid");
-        r.add("hacktrain.auth.cors-origins",()->"http://localhost:8080"); r.add("spring.mail.host",()->"localhost"); r.add("management.server.port",()->"0");
+        r.add("hacktrain.auth.cors-origins",()->"http://localhost:8080"); r.add("management.server.port",()->"0");
     }
     @Autowired az.hacktrain.course.CourseService courses;
     @Autowired OrganizationService service; @Autowired TestIdentityFactory accounts;
     @Autowired JdbcTemplate jdbc; @Autowired PlatformTransactionManager manager; @Autowired TenantScope scope;
     @Autowired TestRestTemplate http; @Autowired org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
-    @MockitoBean JavaMailSender mail;
     @BeforeEach void resetLimits() { redisTemplate.execute((org.springframework.data.redis.core.RedisCallback<Object>)c->{c.serverCommands().flushDb();return null;}); }
     OrganizationView create(Actor owner) { return service.create(owner.id(),new Create("Academy "+UUID.randomUUID())); }
     MemberView join(OrganizationView org,Actor admin,Actor invited,Role role) {
-        service.invite(org.id(),admin.id(),new Invite(invited.email(),role)); return service.accept(invited.id(),accounts.latestToken(invited.email()));
+        var invitation=service.invite(org.id(),admin.id(),new Invite(invited.email(),role));
+        return service.accept(invited.id(),invitation.token());
     }
     MemberView ownerMembership(OrganizationView org,Actor owner) { return service.members(org.id(),owner.id(),0,100).items().stream().filter(m->m.userId().equals(owner.id())).findFirst().orElseThrow(); }
     ResponseEntity<String> request(Actor actor,HttpMethod method,String path,Object body) {
@@ -193,8 +189,8 @@ class OrganizationFlowIT {
     }
     @Test void invitationsAreEmailBoundSingleUseAndReplaceOlderLink() {
         var admin=accounts.create();var student=accounts.create();var stranger=accounts.create();var org=create(admin);
-        service.invite(org.id(),admin.id(),new Invite(student.email(),Role.STUDENT));var old=accounts.latestToken(student.email());
-        service.invite(org.id(),admin.id(),new Invite(student.email(),Role.STUDENT));var current=accounts.latestToken(student.email());
+        var old=service.invite(org.id(),admin.id(),new Invite(student.email(),Role.STUDENT)).token();
+        var current=service.invite(org.id(),admin.id(),new Invite(student.email(),Role.STUDENT)).token();
         assertThatThrownBy(()->service.accept(student.id(),old)).isInstanceOf(OrganizationFailure.class);
         assertThatThrownBy(()->service.accept(stranger.id(),current)).isInstanceOf(OrganizationFailure.class);
         var member=service.accept(student.id(),current);assertThat(member.role()).isEqualTo("STUDENT");
@@ -203,10 +199,11 @@ class OrganizationFlowIT {
     }
     @Test void expiredAndRevokedInvitationsCannotJoin() {
         var admin=accounts.create();var invitee=accounts.create();var org=create(admin);
-        var first=service.invite(org.id(),admin.id(),new Invite(invitee.email(),Role.TEACHER));var raw=accounts.latestToken(invitee.email());
-        service.revokeInvitation(org.id(),admin.id(),first.id());assertThatThrownBy(()->service.accept(invitee.id(),raw)).isInstanceOf(OrganizationFailure.class);
-        var second=service.invite(org.id(),admin.id(),new Invite(invitee.email(),Role.TEACHER));var expired=accounts.latestToken(invitee.email());
-        new TransactionTemplate(manager).executeWithoutResult(s->{scope.actor(admin.id());scope.organization(org.id());jdbc.update("update org_invitation set expires_at=now()-interval '1 second' where id=?",second.id());});
+        var first=service.invite(org.id(),admin.id(),new Invite(invitee.email(),Role.TEACHER));
+        service.revokeInvitation(org.id(),admin.id(),first.invitation().id());assertThatThrownBy(()->service.accept(invitee.id(),first.token())).isInstanceOf(OrganizationFailure.class);
+        var second=service.invite(org.id(),admin.id(),new Invite(invitee.email(),Role.TEACHER));
+        new TransactionTemplate(manager).executeWithoutResult(s->{scope.actor(admin.id());scope.organization(org.id());jdbc.update("update org_invitation set expires_at=now()-interval '1 second' where id=?",second.invitation().id());});
+        var expired=second.token();
         assertThatThrownBy(()->service.accept(invitee.id(),expired)).isInstanceOf(OrganizationFailure.class);
     }
     @Test void teacherSeesOnlyAssignedGroupsAndStudentsCannotManageRoles() {
@@ -273,13 +270,17 @@ class OrganizationFlowIT {
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
         return UUID.fromString(new com.fasterxml.jackson.databind.ObjectMapper().readTree(response.getBody()).get("id").asText());
     }
+    String invitationToken(ResponseEntity<String> response) throws Exception {
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        return new com.fasterxml.jackson.databind.ObjectMapper().readTree(response.getBody()).get("token").asText();
+    }
     @Test void completeTeacherAndStudentAssignmentThroughHttp() throws Exception {
         var admin=accounts.create();var teacher=accounts.create();var student=accounts.create();var org=create(admin);String base="/organizations/"+org.id();
         assertThat(request(admin,HttpMethod.GET,base,null).getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(request(admin,HttpMethod.POST,base+"/invitations",new Invite(teacher.email(),Role.TEACHER)).getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        UUID teacherMember=responseId(request(teacher,HttpMethod.POST,"/invitations/accept",new AcceptInvite(accounts.latestToken(teacher.email()))));
-        assertThat(request(admin,HttpMethod.POST,base+"/invitations",new Invite(student.email(),Role.STUDENT)).getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        UUID studentMember=responseId(request(student,HttpMethod.POST,"/invitations/accept",new AcceptInvite(accounts.latestToken(student.email()))));
+        var teacherInvitation=request(admin,HttpMethod.POST,base+"/invitations",new Invite(teacher.email(),Role.TEACHER));
+        UUID teacherMember=responseId(request(teacher,HttpMethod.POST,"/invitations/accept",new AcceptInvite(invitationToken(teacherInvitation))));
+        var studentInvitation=request(admin,HttpMethod.POST,base+"/invitations",new Invite(student.email(),Role.STUDENT));
+        UUID studentMember=responseId(request(student,HttpMethod.POST,"/invitations/accept",new AcceptInvite(invitationToken(studentInvitation))));
         UUID group=responseId(request(admin,HttpMethod.POST,base+"/groups",new Create("HTTP assignments")));String gp=base+"/groups/"+group;
         assertThat(request(admin,HttpMethod.PUT,gp+"/teachers/"+teacherMember,null).getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(request(admin,HttpMethod.POST,gp+"/students/"+studentMember,null).getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);

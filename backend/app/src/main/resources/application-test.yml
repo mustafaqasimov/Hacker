@@ -1,13 +1,3 @@
-hacktrain:
-  auth:
-    email-confirmation-required: true
-  mail:
-    poll-ms: 3600000
-management:
-  health:
-    mail:
-      enabled: false
-
 spring:
   flyway:
     enabled: true

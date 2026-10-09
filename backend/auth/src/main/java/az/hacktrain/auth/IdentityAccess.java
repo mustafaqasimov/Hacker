@@ -5,8 +5,6 @@ import java.util.UUID;
 /** Public module boundary; no persistence entity escapes auth. */
 @Service
 public class IdentityAccess implements IdentityDirectory {
-    @org.springframework.beans.factory.annotation.Value("${hacktrain.auth.email-confirmation-required:false}")
-    private boolean confirmationRequired=true;
     private final UserRepository users;
     @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager em;
     IdentityAccess(UserRepository users) { this.users=users; }
@@ -15,7 +13,7 @@ public class IdentityAccess implements IdentityDirectory {
     @Transactional
     public Identity lockActive(UUID id) { var user=users.lockById(id).orElseThrow(AuthFailure::invalid); em.refresh(user); return safe(user); }
     private Identity safe(UserAccount user) {
-        if(user.blocked || (confirmationRequired && !user.emailVerified)) throw AuthFailure.invalid();
+        if(user.blocked) throw AuthFailure.invalid();
         return new Identity(user.id,user.email);
     }
 }

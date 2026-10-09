@@ -56,7 +56,7 @@ Access JWT 10 dəqiqə yaşayır, issuer/audience/HS256 və vaxt yoxlamaları va
 
 Token-lər JSON ilə qaytarılır; cookie authentication yoxdur və CSRF bu stateless bearer API üçün söndürülür. Frontend access token-i yaddaşda saxlamalıdır; refresh token-i localStorage-da saxlamamalıdır. Brauzer persistent login üçün gələcək BFF/HttpOnly cookie adapterində CSRF qorunması əlavə olunmalıdır. CORS konkret origin allowlist-dir. Parol BCrypt limitinə görə UTF-8 72 baytdan uzun qəbul edilmir. Verification/reset token-ləri hash-lənir, bir dəfə işləyir, məqsəd və vaxtla məhdudlaşır. Parol reset bütün sessiyaları ləğv edir. Qeydiyyat/reset/resend naməlum və məlum email üçün eyni public nəticə qaytarır.
 
-SMTP mesajları DB outbox-a eyni tranzaksiyada yazılır. Outbox payload AES-GCM ilə şifrələnir; uğurlu göndərişdən sonra payload silinir, retry exponential backoff-dur. SMTP cavabından sonra DB commit itərsə təkrar email mümkündür (at-least-once). Token və parol application loglarına yazılmır. Auth təhlükəsizlik hadisələri eyni tranzaksiyada qeydə alınır.
+Tətbiq email və SMTP göndərişindən istifadə etmir. Auth təhlükəsizlik hadisələri eyni tranzaksiyada qeydə alınır.
 
 ## Laboratoriya sərhədi
 

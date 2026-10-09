@@ -28,10 +28,6 @@ services:
       timeout: 3s
       retries: 20
     networks: [data]
-  mailpit:
-    image: axllent/mailpit:v1.27.8
-    ports: ["127.0.0.1:8025:8025"]
-    networks: [data, edge]
   migrate:
     build: .
     entrypoint: [java, -jar, /app/migrator.jar]
@@ -64,14 +60,7 @@ services:
       DB_PASSWORD: ${RUNTIME_DB_PASSWORD:?Set RUNTIME_DB_PASSWORD}
       REDIS_URL: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD}@redis:6379
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
-      MAIL_ENCRYPTION_KEY: ${MAIL_ENCRYPTION_KEY:?Set MAIL_ENCRYPTION_KEY}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
-      MAIL_FROM: noreply@hacktrain.local
-      SMTP_HOST: mailpit
-      SMTP_PORT: 1025
-      SMTP_AUTH: false
-      SMTP_TLS: false
     ports: ["127.0.0.1:8081:8080"]
     read_only: true
     tmpfs: ["/tmp:size=64m,noexec,nosuid"]
